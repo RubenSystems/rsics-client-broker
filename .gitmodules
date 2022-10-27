@@ -1,0 +1,3 @@
+[submodule "RSiCS"]
+	path = RSiCS
+	url = https://github.com/RubenSystems/RSiCS.git
