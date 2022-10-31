@@ -40,9 +40,6 @@ void cache_add(struct Cache * cache, struct CacheNode * node) {
 	unsigned long probe = hash(node->transaction_id);
 	unsigned long current_time = time(NULL);
 	
-	
-	
-	
 	if ((float)cache->size / (float)cache->allocated_size > max_size_to_allocated_ratio) {
 		remove_expired_entries(cache);
 		printf("RESIZE\n");

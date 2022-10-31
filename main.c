@@ -14,46 +14,48 @@
 #include "def/client_cache.h"
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
+
+
 
 static void new_client(void * context, struct Computer from_computer, const char * message, int message_size) {
-	printf("%s\n", message);
-	transmit("hello there!", 12, &from_computer);
+	struct Cache * cache = (struct Cache *)context;
+	struct CacheNode * connector;
+	if (message_size != UID_SIZE - 1) {
+		return;
+	}
+	if ((connector = cache_get(cache, (char *)message)) == NULL) {
+		struct CacheNode new_client = {
+			.transaction_creator = from_computer,
+			.ttl = time(NULL) + 1000
+		};
+		strncpy(new_client.transaction_id, message, UID_SIZE - 1);
+		
+		cache_add(cache, &new_client);
+	} else {
+		// Send connection info about joiner to creator
+		transmit((char *)&connector->transaction_creator, sizeof(struct Computer), &from_computer);
+		
+		// Send connection info about joiner to creator
+		transmit((char *)&from_computer, sizeof(struct Computer), &connector->transaction_creator);
+	}
 }
+
 
 int main(int argc, const char * argv[]) {
 	// insert code here...
 	
-//	struct Computer server;
-//	create_listener("5253", &server);
-//	char is_active = 1;
-//	observe(&server, &is_active, new_client);
+	struct Cache pending_clients;
+	init_cache(&pending_clients);
 	
-	struct Cache client_broker;
-	init_cache(&client_broker);
+	struct Computer server;
+	create_listener("5253", &server);
+	char is_active = 1;
+	observe_with_context(&server, &is_active, &pending_clients, new_client);
 	
-	struct CacheNode node = {
-		.transaction_id = "hello there",
-		.transaction_creator = 1,
-		.ttl = time(NULL) + 1000
-	};
 	
-	struct CacheNode node2 = {
-		.transaction_id = "hello there2",
-		.transaction_creator = 2,
-		.ttl = time(NULL)
-	};
 	
-	cache_add(&client_broker, &node);
-	cache_add(&client_broker, &node2);
 	
-	printf("size: %i\n", client_broker.size);
-	sleep(10);
-	struct CacheNode * val =  cache_get(&client_broker, "hello there");
-	if (val) {
-		printf("%i\n", val->transaction_creator);
-	} else {
-		printf("NOT IN\n");
-	}
 	
 	
 	return 0;

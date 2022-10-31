@@ -14,7 +14,7 @@
 
 #define UID_SIZE 36
 typedef char key_type[UID_SIZE];
-typedef int value_type;
+typedef struct Computer value_type;
 
 
 struct CacheNode {
