@@ -20,7 +20,7 @@ typedef int value_type;
 struct CacheNode {
 	key_type transaction_id;
 	value_type transaction_creator;
-	long ttl;
+	unsigned long ttl;
 };
 
 struct Cache {
