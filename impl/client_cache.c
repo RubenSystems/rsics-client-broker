@@ -14,7 +14,7 @@
  https://github.com/python/cpython/blob/main/Objects/dictobject.c#L745
  */
 
-static int initial_size = 8000;
+static int initial_size = 8;
 static int growth_rate = 3;
 static int probe_shift = 5;
 
@@ -42,14 +42,20 @@ void cache_add(struct Cache * cache, struct CacheNode * node) {
 			cache->data[index] = *node;
 			cache->size++;
 			return;
+		} else if (strcmp(cache->data[index].transaction_id, node->transaction_id) == 0) {
+			// Same ids, override node in current position.
+			cache->data[index] = *node;
+			return;
 		} else if (cache->data[index].ttl < current_time) {
 			// There is a value but it has expired so can be replaced
 			// No need to increment size as it has been incremented already;
 			cache->data[index] = *node;
 			return;
 		}
+		
 		probe >>= probe_shift;
 		index = mask & (index * 5 + probe + 1);
+		printf("CLASH %i\n", index);
 	}
 }
 
@@ -57,6 +63,7 @@ struct CacheNode * cache_get(struct Cache * cache, key_type key) {
 	unsigned int mask = cache->allocated_size - 1;
 	unsigned long index = hash(key) & mask;
 	unsigned long probe = hash(key);
+	unsigned long begin_index = index;
 	long current_time = time(NULL);
 	unsigned long prev_index = index;
 
@@ -69,12 +76,13 @@ struct CacheNode * cache_get(struct Cache * cache, key_type key) {
 			cache->data[index].transaction_id[0] = 0;
 			return NULL;
 		}
-				
+		prev_index = index;
 		probe >>= probe_shift;
 		index = mask & (index * 5 + probe + 1);
-		if (prev_index > index) {
+		if (index == begin_index && prev_index != begin_index) {
 			return NULL;
 		}
+
 	}
 }
 
