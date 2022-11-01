@@ -99,6 +99,20 @@ struct CacheNode * cache_get(struct Cache * cache, key_type key) {
 }
 
 
+// Returns the invalidated cache node
+enum CacheInvalidationResult cache_invalidate(struct Cache * cache, struct CacheNode * result, key_type id) {
+	struct CacheNode * node;
+	
+	if ((node = cache_get(cache, id)) != NULL) {
+		*result = *node;
+		node->transaction_id[0] = 0;
+		cache->size --;
+		return INVALIDATION_SUCCESS;
+	}
+	return INVALIDATION_NOTFOUND;
+}
+
+
 
 // MARK: - Helper Impl
 static unsigned long hash(key_type key) {

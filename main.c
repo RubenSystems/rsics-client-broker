@@ -20,14 +20,14 @@
 
 static void new_client(void * context, struct Computer from_computer, const char * message, int message_size) {
 	struct Cache * cache = (struct Cache *)context;
-	struct CacheNode * connector;
+	struct CacheNode * connector = NULL;
 	if (message_size != UID_SIZE - 1) {
 		return;
 	}
-	if ((connector = cache_get(cache, (char *)message)) == NULL) {
+	if (cache_invalidate(cache, connector, (char *)message) == INVALIDATION_NOTFOUND) {
 		struct CacheNode new_client = {
 			.transaction_creator = from_computer,
-			.ttl = time(NULL) + 1000
+			.ttl = time(NULL) + 60 // In cache for 60 seconds
 		};
 		strncpy(new_client.transaction_id, message, UID_SIZE - 1);
 		
@@ -38,6 +38,7 @@ static void new_client(void * context, struct Computer from_computer, const char
 		
 		// Send connection info about joiner to creator
 		transmit((char *)&from_computer, sizeof(struct Computer), &connector->transaction_creator);
+		
 	}
 }
 

@@ -29,13 +29,18 @@ struct Cache {
 	unsigned int 		allocated_size;
 };
 
+enum CacheInvalidationResult {
+	INVALIDATION_SUCCESS,
+	INVALIDATION_NOTFOUND
+};
+
 void init_cache(struct Cache *);
 
 void cache_add(struct Cache *, struct CacheNode *);
 
 struct CacheNode * cache_get(struct Cache *, key_type);
 
-
+enum CacheInvalidationResult cache_invalidate(struct Cache *, struct CacheNode *, key_type);
 
 
 #endif /* client_cache_h */
