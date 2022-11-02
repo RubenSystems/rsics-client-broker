@@ -21,7 +21,7 @@
 static void new_client(void * context, struct Computer from_computer, const char * message, int message_size) {
 	struct Cache * cache = (struct Cache *)context;
 	struct CacheNode * connector = NULL;
-	if (message_size != UID_SIZE - 1) {
+	if (message_size > UID_SIZE - 1) {
 		return;
 	}
 	if (cache_invalidate(cache, connector, (char *)message) == INVALIDATION_NOTFOUND) {
