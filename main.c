@@ -12,6 +12,7 @@
 #include "RSiCS/definition/models.h"
 
 #include "def/client_cache.h"
+#include "crypto/salt.h"
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
@@ -45,15 +46,15 @@ static void new_client(void * context, struct Computer from_computer, const char
 
 int main(int argc, const char * argv[]) {
 	// insert code here...
-	
+
 	struct Cache pending_clients;
 	init_cache(&pending_clients);
 	
 	struct Computer server;
 	create_listener("5253", &server);
-	char is_active = 1;
-	observe_with_context(&server, &is_active, &pending_clients, new_client);
-	
+//	char is_active = 1;
+//	observe_with_context(&server, &is_active, &pending_clients, new_client);
+//
 	
 	
 	
