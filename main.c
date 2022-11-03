@@ -52,8 +52,8 @@ int main(int argc, const char * argv[]) {
 	
 	struct Computer server;
 	create_listener("5253", &server);
-//	char is_active = 1;
-//	observe_with_context(&server, &is_active, &pending_clients, new_client);
+	char is_active = 1;
+	observe_with_context(&server, &is_active, &pending_clients, new_client);
 //
 	
 	

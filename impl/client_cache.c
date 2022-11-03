@@ -28,7 +28,7 @@ static void resize_cache(struct Cache *);
 
 // MARK: - Impl
 void init_cache(struct Cache * cache) {
-	cache->data = calloc(initial_size, initial_size);
+	cache->data = calloc(initial_size, sizeof(struct Cache));
 	memset(cache->data, 0, sizeof(struct CacheNode) * initial_size);
 	cache->size = 0;
 	cache->allocated_size = initial_size;
