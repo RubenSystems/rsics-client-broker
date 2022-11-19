@@ -40,9 +40,9 @@ void cache_add(struct Cache * cache, struct CacheNode * node) {
 	unsigned long probe = hash(node->transaction_id);
 	unsigned long current_time = time(NULL);
 	
+	
 	if ((float)cache->size / (float)cache->allocated_size > max_size_to_allocated_ratio) {
 		remove_expired_entries(cache);
-		printf("RESIZE\n");
 		if ((float)cache->size / (float)cache->allocated_size > max_size_to_allocated_ratio) {
 			resize_cache(cache);
 		}
@@ -74,10 +74,10 @@ struct CacheNode * cache_get(struct Cache * cache, key_type key) {
 	unsigned int mask = cache->allocated_size - 1;
 	unsigned long index = hash(key) & mask;
 	unsigned long probe = hash(key);
-	unsigned long begin_index = index;
 	unsigned long current_time = time(NULL);
-	unsigned long prev_index = index;
 
+	unsigned int match_sum = ( (cache->allocated_size) * (cache->allocated_size + 1) ) / 2;
+	unsigned int index_sum = 0;
 	
 	while (1) {
 		if (strcmp(key, cache->data[index].transaction_id) == 0 && current_time <= cache->data[index].ttl ) {
@@ -88,13 +88,16 @@ struct CacheNode * cache_get(struct Cache * cache, key_type key) {
 			cache->data[index].transaction_id[0] = 0;
 			return NULL;
 		}
-		prev_index = index;
-		probe >>= probe_shift;
-		index = mask & (index * 5 + probe + 1);
-		if (index == begin_index && prev_index != begin_index) {
+		
+		index_sum += index;
+		if (index_sum >= match_sum) {
 			return NULL;
 		}
-
+		
+		
+		probe >>= probe_shift;
+		index = mask & (index * 5 + probe + 1);
+		
 	}
 }
 
@@ -105,6 +108,7 @@ enum CacheInvalidationResult cache_invalidate(struct Cache * cache, struct Cache
 	
 	if ((node = cache_get(cache, id)) != NULL) {
 		*result = *node;
+//		printf("GOT NODE: %s\n", node->transaction_id)
 		node->transaction_id[0] = 0;
 		cache->size --;
 		return INVALIDATION_SUCCESS;
@@ -116,9 +120,7 @@ enum CacheInvalidationResult cache_invalidate(struct Cache * cache, struct Cache
 
 // MARK: - Helper Impl
 static unsigned long hash(key_type key) {
-	unsigned long hash;
-	
-	hash = 5381;
+	unsigned long hash = 5381;
 	for (int i = 0; i < UID_SIZE; i ++) {
 		if (key[i] == 0) {
 			break;
@@ -145,7 +147,6 @@ static void resize_cache(struct Cache * cache) {
 	struct CacheNode * old_data = cache->data;
 	unsigned int old_alloc_size = cache->allocated_size;
 	unsigned int old_size = cache->size;
-	
 	cache->data = calloc(cache->allocated_size * growth_rate, sizeof(struct CacheNode));
 	
 	cache->size = 0;
@@ -161,6 +162,8 @@ static void resize_cache(struct Cache * cache) {
 			break;
 		}
 	}
+	
+	printf("%i %i\n", cache->size, cache->allocated_size);
 	
 	free(old_data);
 }

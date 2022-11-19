@@ -21,11 +21,15 @@
 
 static void new_client(void * context, struct Computer from_computer, const char * message, int message_size) {
 	struct Cache * cache = (struct Cache *)context;
-	struct CacheNode * connector = NULL;
+	struct CacheNode connector;
+	
+	
 	if (message_size > UID_SIZE - 1) {
 		return;
 	}
-	if (cache_invalidate(cache, connector, (char *)message) == INVALIDATION_NOTFOUND) {
+	printf("%s\n", message);
+	if (cache_invalidate(cache, &connector, (char *)message) == INVALIDATION_NOTFOUND) {
+		printf("IN CAACHE\n");
 		struct CacheNode new_client = {
 			.transaction_creator = from_computer,
 			.ttl = time(NULL) + 60 // In cache for 60 seconds
@@ -34,11 +38,12 @@ static void new_client(void * context, struct Computer from_computer, const char
 		
 		cache_add(cache, &new_client);
 	} else {
+		printf("JOINING\n");
 		// Send connection info about joiner to creator
-		transmit((char *)&connector->transaction_creator, sizeof(struct Computer), &from_computer);
+		transmit((char *)&connector.transaction_creator, sizeof(struct Computer), &from_computer);
 		
 		// Send connection info about joiner to creator
-		transmit((char *)&from_computer, sizeof(struct Computer), &connector->transaction_creator);
+		transmit((char *)&from_computer, sizeof(struct Computer), &connector.transaction_creator);
 		
 	}
 }
@@ -54,8 +59,6 @@ int main(int argc, const char * argv[]) {
 	create_listener("5253", &server);
 	char is_active = 1;
 	observe_with_context(&server, &is_active, &pending_clients, new_client);
-//
-	
 	
 	
 	

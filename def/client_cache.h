@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "../RSiCS/definition/models.h"
 
-#define UID_SIZE 36
+#define UID_SIZE 38
 typedef char key_type[UID_SIZE];
 typedef struct Computer value_type;
 
