@@ -19,7 +19,7 @@
 
 
 
-static void new_client(void * context, struct Computer from_computer, const char * message, int message_size) {
+static void new_client(const void * context, struct Computer from_computer, const char * message, int message_size) {
 	struct Cache * cache = (struct Cache *)context;
 	struct CacheNode connector;
 	
@@ -56,7 +56,7 @@ int main(int argc, const char * argv[]) {
 	init_cache(&pending_clients);
 	
 	struct Computer server;
-	create_listener("5253", &server);
+	create_listener("5254", &server);
 	char is_active = 1;
 	observe_with_context(&server, &is_active, &pending_clients, new_client);
 	

@@ -14,10 +14,10 @@
  https://github.com/python/cpython/blob/main/Objects/dictobject.c#L745
  */
 
-static int initial_size = 8;
-static int growth_rate = 3;
-static double max_size_to_allocated_ratio = 2.0/3.0;
-static int probe_shift = 5;
+static int 		initial_size 				= 8;
+static int 		growth_rate 				= 3;
+static double 	max_size_to_allocated_ratio = 2.0/3.0;
+static int 		probe_shift 				= 5;
 
 // MARK: - Helper Defs
 static unsigned long hash(key_type);
