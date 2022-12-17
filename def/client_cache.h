@@ -18,9 +18,9 @@ typedef struct Computer value_type;
 
 
 struct CacheNode {
-	key_type transaction_id;
-	value_type transaction_creator;
-	unsigned long ttl;
+	key_type 		transaction_id;
+	value_type 		transaction_creator;
+	unsigned long	ttl;
 };
 
 struct Cache {

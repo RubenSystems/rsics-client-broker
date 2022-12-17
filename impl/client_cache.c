@@ -108,7 +108,6 @@ enum CacheInvalidationResult cache_invalidate(struct Cache * cache, struct Cache
 	
 	if ((node = cache_get(cache, id)) != NULL) {
 		*result = *node;
-//		printf("GOT NODE: %s\n", node->transaction_id)
 		node->transaction_id[0] = 0;
 		cache->size --;
 		return INVALIDATION_SUCCESS;

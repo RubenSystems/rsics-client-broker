@@ -19,20 +19,20 @@
 
 
 
-static void new_client(const void * context, struct Computer from_computer, const char * message, int message_size) {
+static void new_client(const void * context, struct Computer from_computer, void * message, int message_size) {
 	struct Cache * cache = (struct Cache *)context;
 	struct CacheNode connector;
-	
+	memset(&connector, 0, sizeof(struct CacheNode));
 	
 	if (message_size > UID_SIZE - 1) {
 		return;
 	}
-	printf("%s\n", message);
+	printf("%s\n", (const char *)message);
 	if (cache_invalidate(cache, &connector, (char *)message) == INVALIDATION_NOTFOUND) {
 		printf("IN CAACHE\n");
 		struct CacheNode new_client = {
 			.transaction_creator = from_computer,
-			.ttl = time(NULL) + 60 // In cache for 60 seconds
+			.ttl = time(NULL) + 5 // In cache for n seconds
 		};
 		strncpy(new_client.transaction_id, message, UID_SIZE - 1);
 		
@@ -40,11 +40,12 @@ static void new_client(const void * context, struct Computer from_computer, cons
 	} else {
 		printf("JOINING\n");
 		// Send connection info about joiner to creator
-		transmit((char *)&connector.transaction_creator, sizeof(struct Computer), &from_computer);
+		printf("%i %i", connector.transaction_creator.socket_address_size, from_computer.socket_address_size);
+		transmit((char *)&(connector.transaction_creator), sizeof(struct Computer), &from_computer);
 		
 		// Send connection info about joiner to creator
 		transmit((char *)&from_computer, sizeof(struct Computer), &connector.transaction_creator);
-		
+		memset(&connector, 0, sizeof(struct CacheNode));
 	}
 }
 
